@@ -19,7 +19,7 @@ To ease the pain, we can use an _Inversion of Control Container_, or IOC Contain
 2. Refactor `data.js`, so the module exports the following properties: `name`, and `factory`.
 Set the name to, "data". Set the factory to the current export.
 3. Refactor `DataConnection.js`, so the module exports the following properties: `name`, and `factory`. Set the name to, "db". Set the factory to the current export. Rename the file to `db.js`.
-4. Refactor `Logger.js`, so the module exports the following properties: `name`, and `factory`. Set the name to, "Logger". Set the factory to the current export. Rename the file to `logger.js`.
+4. Refactor `Logger.js`, so the module exports the following properties: `name`, and `factory`. Set the name to, "logger". Set the factory to the current export. Rename the file to `logger.js`.
 5. Refactor `Product.js`, so the module exports the following properties: `name`, `dependencies`, and `factory`. Set the name to, "Product". Set the factory to the current export. Set the dependencies to `false`.
 6. Refactor `ProductRepo.js`, so the module exports the following properties: `name`, and `factory`. Set the name to, "productRepo". Set the factory to the current export. Rename the file to `productRepo.js`.
 7. Refactor `Server.js`, so the module exports the following properties: `name`, and `factory`. Set the name to, "Server". Set the factory to the current export.
