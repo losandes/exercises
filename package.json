@@ -4,17 +4,19 @@
   "description": "JavaScript exercises",
   "main": "index.js",
   "scripts": {
-      "test": "npm run test-solid",
-      "test-solid": "node SOLID/02-01-freezing-and-sealing/exercise; node SOLID/02-02-open-closed/exercise; node SOLID/03-01-LSP-with-objects/exercise; node SOLID/05-01-SRP-DIP/exercise; node SOLID/05-02-poor-mans-di/exercise; node SOLID/05-03-ioc-containers/exercise;"
+    "test": "npm run test-solid",
+    "test-solid": "node SOLID/02-01-freezing-and-sealing/exercise; node SOLID/02-02-open-closed/exercise; node SOLID/03-01-LSP-with-objects/exercise; node SOLID/05-01-SRP-DIP/exercise; node SOLID/05-02-poor-mans-di/exercise; node SOLID/05-03-ioc-containers/exercise;"
   },
   "author": "Andy Wright <andes.collab@gmail.com> (https://github.com/losandes)",
   "license": "MIT",
   "dependencies": {
-    "assay": "git+https://github.com/losandes/assay.git",
     "async": "^2.1.2",
     "hilary": "^5.0.*",
     "mongodb": "^2.2.11",
     "polyn": "^1.10.*",
     "prompt": "^1.0.0"
+  },
+  "devDependencies": {
+    "supposed": "^0.1.0"
   }
 }

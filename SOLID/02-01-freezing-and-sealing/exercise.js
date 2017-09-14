@@ -1,81 +1,73 @@
 'use strict';
 
-const test = require('assay');
+const test = require('supposed');
 const data = require('./data.js');
 const BaseRepo = require('./BaseRepo.js').factory();
 const FrozenRepo = require('./FrozenRepo.js').factory(BaseRepo);
 const SealedRepo = require('./SealedRepo.js').factory(BaseRepo);
 const PreventExtensionsRepo = require('./PreventExtensionsRepo.js').factory(BaseRepo);
 
-test('freezing-and-sealing', {
+test('(SOLID::02-01-freezing-and-sealing)', {
     'when I add a new property': {
-        when: (resolve, reject) => {
-            iEnhance(BaseRepo, resolve, reject);
+        when: () => {
+            return iEnhance(BaseRepo);
         },
         'it should add a new property to the object': itShouldAddANewProperty,
         'and that object is frozen': {
-            when: (resolve, reject) => {
-                iEnhance(FrozenRepo, resolve, reject);
+            when: () => {
+                return iEnhance(FrozenRepo);
             },
             'it should throw an Error': itShouldThrowObjectIsNotExtensible
         },
         'and that object is sealed': {
-            when: (resolve, reject) => {
-                iEnhance(SealedRepo, resolve, reject);
+            when: () => {
+                return iEnhance(SealedRepo);
             },
             'it should throw an Error': itShouldThrowObjectIsNotExtensible
         },
         'and that object prevents extensions': {
-            when: (resolve, reject) => {
-                iEnhance(PreventExtensionsRepo, resolve, reject);
+            when: () => {
+                return iEnhance(PreventExtensionsRepo);
             },
             'it should throw an Error': itShouldThrowObjectIsNotExtensible
         }
     },
     'when I modify an existing property': {
-        when: (resolve, reject) => {
-            iModify(BaseRepo, resolve, reject);
+        when: () => {
+            return iModify(BaseRepo);
         },
         'it should overwrite the property': itShouldOverwriteTheProperty,
         'and that object is frozen': {
-            when: (resolve, reject) => {
-                iModify(FrozenRepo, resolve, reject);
+            when: () => {
+                return iModify(FrozenRepo);
             },
             'it should throw an Error': itShouldThrowCannotAssign
         },
         'and that object is sealed': {
-            when: (resolve, reject) => {
-                iModify(SealedRepo, resolve, reject);
+            when: () => {
+                return iModify(SealedRepo);
             },
             'it should overwrite the property': itShouldOverwriteTheProperty,
         },
         'and that object prevents extensions': {
-            when: (resolve, reject) => {
-                iModify(PreventExtensionsRepo, resolve, reject);
+            when: () => {
+                return iModify(PreventExtensionsRepo);
             },
             'it should overwrite the property': itShouldOverwriteTheProperty,
         }
     }
 });
 
-function iEnhance(Repo, resolve, reject) {
-    try {
-        var repo = prepRepo(Repo, 'products');
-        repo.get = function (id) { return this.data[id]; };
-        resolve(repo);
-    } catch (e) {
-        reject(e);
-    }
+function iEnhance(Repo) {
+    var repo = prepRepo(Repo, 'products');
+    repo.get = function (id) { return this.data[id]; };
+    return repo;
 }
 
-function iModify(Repo, resolve, reject) {
-    try {
-        var repo = prepRepo(Repo, 'products');
-        repo.create = function () { return 'EVIL'; };
-        resolve(repo);
-    } catch (e) {
-        reject(e);
-    }
+function iModify(Repo) {
+    var repo = prepRepo(Repo, 'products');
+    repo.create = function () { return 'EVIL'; };
+    return repo;
 }
 
 function itShouldAddANewProperty (t, err, actual) {

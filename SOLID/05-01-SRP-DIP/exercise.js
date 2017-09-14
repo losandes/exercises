@@ -1,41 +1,43 @@
 'use strict';
 
 const ProductInventoryRepo = require('./ProductInventoryRepo.js');
-const test = require('assay');
+const test = require('supposed');
 
-test('SRP-DIP', {
+test('(SOLID::05-01-SRP-DIP)', {
     'when a productInventoryRepo is constructed with a data connection': {
-        when: resolve => {
+        when: () => {
             let mockDb = makeMockDb();
             let repo = new ProductInventoryRepo(mockDb, makeMockLogger());
             let productId = 42;
 
             repo.findQuantityAvailable(productId);
 
-            resolve({
+            return {
                 productId: productId,
                 dbValues: mockDb.getValues()
-            });
+            };
         },
-        'it should accept a db instance': (t, err, actual) => {
+        'it should accept a db instance': (t) => (err, actual) => {
+            t.ifError(err);
             t.equal(actual.dbValues.where.id, actual.productId);
             t.equal(actual.dbValues.table, 'products');
             t.equal(actual.dbValues.columns[0], 'quantity');
         }
     },
     'when a productInventoryRepo is constructed with a logger': {
-        when: resolve => {
+        when: () => {
             let mockLogger = makeMockLogger();
             let repo = new ProductInventoryRepo(null, mockLogger);
 
             repo.findQuantityAvailable(42).catch(() => {});
 
-            resolve({
+            return {
                 productId: 42,
                 logMessage: mockLogger.getMessage()
-            });
+            };
         },
-        'it should accept a db instance': (t, err, actual) => {
+        'it should accept a db instance': (t) => (err, actual) => {
+            t.ifError(err);
             t.equal(actual.logMessage, 'Unable to find quantity for product ' + actual.productId);
         }
     }

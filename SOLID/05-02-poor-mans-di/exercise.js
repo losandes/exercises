@@ -1,13 +1,14 @@
 'use strict';
 
-const test = require('assay');
+const test = require('supposed');
 const app = require('./app.js');
 const http = require('http');
 
-test('poor-mans-di', {
+module.exports = test('(SOLID::05-02-poor-mans-di)', {
     'when the app starts up': {
-        when: resolve => { resolve(app); },
-        'it should return a server, db, logger, and port': (t, err, app) => {
+        when: () => { return app; },
+        'it should return a server, db, logger, and port': (t) => (err, app) => {
+            t.ifError(err);
             t.equal(typeof app.server, 'object');
             t.equal(app.port, 3000);
             t.equal(typeof app.db, 'function');
@@ -16,7 +17,7 @@ test('poor-mans-di', {
     },
     'when I make a GET request for a product': {
         when: requestProduct,
-        'it should return a product': (t, err, product) => { t.equal(product.id, 42); },
+        'it should return a product': (t) => (err, product) => { t.equal(product.id, 42); },
         'it should use the mock data connection': t => { t.equal(app.db.getValues().where.id, 42); },
         'it should use the mock logger': t => {
             let lastMessage = app.logger.getMessages().pop();
@@ -25,28 +26,34 @@ test('poor-mans-di', {
             t.equal(lastMessage.message, 'productRepo.get found: 42');
         }
     }
+}).then(() => {
+    if (app && app.server) {
+        app.server.close();
+    }
 });
 
-function requestProduct (resolve) {
-    if (!app.server.listening) {
-        app.server.listen(app.port);
-    }
+function requestProduct () {
+    return new Promise((resolve) => {
+        if (!app.server.listening) {
+            app.server.listen(app.port);
+        }
 
-    http.get({
-        host: 'localhost',
-        port: 3000,
-        path: '/products/42'
-    }, function (res) {
-        // Continuously update stream with data
-        var body = '';
+        http.get({
+            host: 'localhost',
+            port: 3000,
+            path: '/products/42'
+        }, function (res) {
+            // Continuously update stream with data
+            var body = '';
 
-        res.on('data', (d) => {
-            body += d;
-        });
+            res.on('data', (d) => {
+                body += d;
+            });
 
-        res.on('end', () => {
-            resolve(JSON.parse(body));
-            app.server.close();
+            res.on('end', () => {
+                resolve(JSON.parse(body));
+                app.server.close();
+            });
         });
     });
 }

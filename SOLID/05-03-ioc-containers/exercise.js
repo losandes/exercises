@@ -1,12 +1,13 @@
 'use strict';
 
-const test = require('assay');
+const test = require('supposed');
 const scope = require('./app.js');
 const http = require('http');
+var sutSingleton;
 
-test('ioc-containers', {
+module.exports = test('(SOLID::05-03-ioc-containers)', {
     'when the app starts up': {
-        when: theServerStarts(),
+        when: theServerStarts,
         'it should return a server, db, logger, and port': appStarts,
         'and I make a GET request for a product': {
             when: iRequestAProduct,
@@ -15,44 +16,46 @@ test('ioc-containers', {
             'it should use the mock logger': usesMockLogger
         }
     }
+}).then(() => {
+    if (sutSingleton && sutSingleton.server) {
+        sutSingleton.server.close();
+    }
 });
 
 function theServerStarts () {
-    return (resolve, reject) => {
+    return new Promise((resolve, reject) => {
         start(0);
 
         function start (tries) {
-            var server;
+            if (sutSingleton) {
+                return resolve(sutSingleton);
+            } else if (scope.exists('server')) {
+                sutSingleton = {
+                    server: scope.resolve('server'),
+                    port: scope.resolve('port'),
+                    db: scope.resolve('db'),
+                    logger: scope.resolve('logger')
+                };
 
-            try {
-                server = scope.resolve('server');
-            } catch (e) { /*ignore*/ }
-
-            if (server.isException) {
-                tries += 1;
-
-                if (tries === 100) {
-                    return reject(new Error('server never started'));
-                }
-
-                return setTimeout(function () {
-                    start(tries, resolve);
-                }, 10);
+                return resolve(sutSingleton);
             }
 
-            resolve({
-                server: server,
-                port: scope.resolve('port'),
-                db: scope.resolve('db'),
-                logger: scope.resolve('logger')
-            });
+            tries += 1;
+
+            if (tries === 100) {
+                return reject(new Error('server never started'));
+            }
+
+            return setTimeout(function () {
+                start(tries, resolve);
+            }, 10);
         }
-    };
+    });
 }
 
-function iRequestAProduct (resolve, reject) {
-    new Promise(theServerStarts())
-        .then(app => {
+function iRequestAProduct () {
+    return new Promise((resolve, reject) => {
+        theServerStarts().then(app => {
             http.get({
                 host: 'localhost',
                 port: 3000,
@@ -68,10 +71,10 @@ function iRequestAProduct (resolve, reject) {
                 res.on('end', () => {
                     app.product = JSON.parse(body);
                     resolve(app);
-                    app.server.close();
                 });
             });
         }).catch(reject);
+    });
 }
 
 function appStarts (t, err, app) {
